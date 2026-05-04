@@ -32,6 +32,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
+          driver-opts: network=host
           # Allow pushing to the local HTTP registry
           buildkitd-config-inline: |
             [registry."192.168.1.218:8080"]
