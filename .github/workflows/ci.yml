@@ -62,17 +62,20 @@ jobs:
           ls -la ~/.ssh/ || echo "Cannot access ~/.ssh/"
 
       - name: Deploy to LXC
+        env:
+          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+          CONTAINER_NAME: ${{ github.event.repository.name }}
         run: |
           ssh -i /home/runner/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
+            -o BatchMode=yes \
             -p ${{ secrets.DEPLOY_PORT }} \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
-            docker stop ${{ github.event.repository.name }} || true
-            docker rm ${{ github.event.repository.name }} || true
-            docker run -d \
-              --name ${{ github.event.repository.name }} \
-              --restart unless-stopped \
-              -p 80:80 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
-          EOF
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "docker pull ${DOCKER_IMAGE}:latest && \
+             docker stop ${CONTAINER_NAME} || true && \
+             docker rm ${CONTAINER_NAME} || true && \
+             docker run -d \
+               --name ${CONTAINER_NAME} \
+               --restart unless-stopped \
+               -p 80:80 \
+               ${DOCKER_IMAGE}:latest"
