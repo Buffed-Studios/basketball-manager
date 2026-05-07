@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: self-hosted
 
     steps:
@@ -46,11 +46,16 @@ jobs:
           provenance: false
           sbom: false
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/basketball-manager:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/basketball-manager:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.sha }}
 
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    if: github.ref == 'refs/heads/main'
+
+    steps:
       - name: Deploy to LXC
-        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -58,11 +63,11 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: ${{ secrets.DEPLOY_PORT }}
           script: |
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/basketball-manager:latest
-            docker stop basketball-manager || true
-            docker rm basketball-manager || true
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            docker stop ${{ github.event.repository.name }} || true
+            docker rm ${{ github.event.repository.name }} || true
             docker run -d \
-              --name basketball-manager \
+              --name ${{ github.event.repository.name }} \
               --restart unless-stopped \
               -p 80:80 \
-              ${{ secrets.DOCKERHUB_USERNAME }}/basketball-manager:latest
+              ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
