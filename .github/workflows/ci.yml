@@ -69,6 +69,7 @@ jobs:
           ssh -i /home/runner/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -o BatchMode=yes \
+            -v \
             -p ${{ secrets.DEPLOY_PORT }} \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
             "docker pull ${DOCKER_IMAGE}:latest && \
