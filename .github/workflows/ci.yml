@@ -55,19 +55,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-      - name: Decode SSH key
-        run: |
-          echo "${{ secrets.DEPLOY_SSH_KEY_B64 }}" | base64 -d > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-
       - name: Deploy to LXC
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key_path: /tmp/deploy_key
-          port: ${{ secrets.DEPLOY_PORT }}
-          script: |
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+            -o StrictHostKeyChecking=no \
+            -p ${{ secrets.DEPLOY_PORT }} \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
             docker stop ${{ github.event.repository.name }} || true
             docker rm ${{ github.event.repository.name }} || true
@@ -76,3 +69,4 @@ jobs:
               --restart unless-stopped \
               -p 80:80 \
               ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          EOF
