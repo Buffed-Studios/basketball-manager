@@ -57,9 +57,7 @@ jobs:
     steps:
       - name: Deploy to LXC
         run: |
-          echo "${{ secrets.DEPLOY_SSH_KEY_B64 }}" | base64 -d > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-          ssh -i /tmp/deploy_key \
+          ssh -i /home/runner/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
             -p ${{ secrets.DEPLOY_PORT }} \
             ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
@@ -72,4 +70,3 @@ jobs:
               -p 80:80 \
               ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
           EOF
-          rm -f /tmp/deploy_key
