@@ -55,6 +55,12 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
+      - name: Debug runner identity
+        run: |
+          whoami
+          ls -la /home/runner/.ssh/ || echo "Cannot access /home/runner/.ssh/"
+          ls -la ~/.ssh/ || echo "Cannot access ~/.ssh/"
+
       - name: Deploy to LXC
         run: |
           ssh -i /home/runner/.ssh/deploy_key \
