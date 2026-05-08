@@ -48,6 +48,9 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           provenance: false
           sbom: false
+          build-args: |
+            VITE_API_HOST=http://${{ secrets.DEPLOY_HOST }}:8080
+            VITE_JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.sha }}

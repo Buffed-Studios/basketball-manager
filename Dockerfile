@@ -7,6 +7,12 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+ARG VITE_API_HOST
+ARG VITE_JWT_SECRET_KEY
+ENV VITE_API_HOST=$VITE_API_HOST
+ENV VITE_JWT_SECRET_KEY=$VITE_JWT_SECRET_KEY
+
 RUN npm run build
 
 # Stage 2: Serve with nginx
