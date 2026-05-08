@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   return (
@@ -8,7 +9,8 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        {/* Additional routes (login, register, dashboard…) go here */}
+        <Route path="/login" element={<LoginPage />} />
+        {/* Additional routes (register, dashboard…) go here */}
       </Routes>
     </BrowserRouter>
   );

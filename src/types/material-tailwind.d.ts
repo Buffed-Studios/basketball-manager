@@ -13,4 +13,20 @@ declare module '@material-tailwind/react' {
     onPointerEnterCapture?: unknown;
     onPointerLeaveCapture?: unknown;
   }
+
+  interface InputProps {
+    placeholder?: unknown;
+    onResize?: unknown;
+    onResizeCapture?: unknown;
+    onPointerEnterCapture?: unknown;
+    onPointerLeaveCapture?: unknown;
+  }
+
+  interface TypographyProps {
+    placeholder?: unknown;
+    onResize?: unknown;
+    onResizeCapture?: unknown;
+    onPointerEnterCapture?: unknown;
+    onPointerLeaveCapture?: unknown;
+  }
 }
