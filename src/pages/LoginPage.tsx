@@ -80,14 +80,12 @@ export default function LoginPage() {
                 <Typography variant="small" className="!text-gray-300 !font-medium">
                   Password
                 </Typography>
-                <Typography
-                  as={Link}
+                <Link
                   to="/forgot-password"
-                  variant="small"
-                  className="!text-orange-400 hover:!text-orange-300 transition-colors"
+                  className="text-sm text-orange-400 hover:text-orange-300 transition-colors"
                 >
                   Forgot password?
-                </Typography>
+                </Link>
               </div>
               <Input
                 type="password"
