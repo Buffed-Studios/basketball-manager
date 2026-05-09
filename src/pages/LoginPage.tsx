@@ -22,8 +22,17 @@ export default function LoginPage() {
     try {
       await login({ username, password });
       navigate('/dashboard');
-    } catch {
-      setError('Invalid username or password. Please try again.');
+    } catch (err: unknown) {
+      console.error('[LoginPage] login error:', err);
+      const status =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 401 || status === 400) {
+        setError('Invalid username or password. Please try again.');
+      } else {
+        setError('Unable to sign in. Please check your connection and try again.');
+      }
     } finally {
       setLoading(false);
     }
