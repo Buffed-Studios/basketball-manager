@@ -1,11 +1,6 @@
 import axios from 'axios';
 import { env } from '../config/env';
-import {
-  getStoredToken,
-  generateServiceToken,
-  storeToken,
-  clearToken,
-} from './authService';
+import { getStoredToken, clearToken } from './authService';
 
 const apiClient = axios.create({
   baseURL: env.apiHost,
@@ -14,15 +9,13 @@ const apiClient = axios.create({
   },
 });
 
-// Attach Bearer token to every request.
-// Falls back to a freshly generated service token if no stored token exists.
-apiClient.interceptors.request.use(async (config) => {
-  let token = getStoredToken();
-  if (!token) {
-    token = await generateServiceToken();
-    storeToken(token);
+// Attach Bearer token to every request if one is stored (i.e. user is logged in).
+// Public endpoints (login, register) are called without a token.
+apiClient.interceptors.request.use((config) => {
+  const token = getStoredToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-  config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
