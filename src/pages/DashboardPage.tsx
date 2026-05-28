@@ -11,14 +11,24 @@ import {
   ChevronRightIcon,
   ChevronDownIcon,
   ArrowLeftIcon,
+  UsersIcon,
+  BanknotesIcon,
+  ArrowsRightLeftIcon,
+  CalendarDaysIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import type { Scenario } from '../services/types';
 
 const ACTIVE_SCENARIO_KEY = 'bm_active_scenario';
 
-type Section = 'offseason' | 'training-camp' | 'draft' | 'regular-season' | 'playoffs' | 'awards';
+type Section =
+  | 'offseason' | 'training-camp' | 'draft' | 'regular-season' | 'playoffs' | 'awards'
+  | 'events' | 'free-agents'
+  | 'roster' | 'budget' | 'trade';
 
-const NAV_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
+const FIRST_SEASON_DISABLED = new Set<Section>(['offseason', 'training-camp', 'draft']);
+
+const SEASON_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
   { id: 'offseason', label: 'Offseason', icon: SunIcon },
   { id: 'training-camp', label: 'Training Camp', icon: FireIcon },
   { id: 'draft', label: 'Draft', icon: ClipboardDocumentListIcon },
@@ -27,8 +37,21 @@ const NAV_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
   { id: 'awards', label: 'Awards', icon: StarIcon },
 ];
 
+const TEAM_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
+  { id: 'roster', label: 'Roster', icon: UsersIcon },
+  { id: 'budget', label: 'Budget', icon: BanknotesIcon },
+  { id: 'trade', label: 'Trade', icon: ArrowsRightLeftIcon },
+];
+
+const LEAGUE_ITEMS: { id: Section; label: string; icon: React.ElementType }[] = [
+  { id: 'events', label: 'Events', icon: CalendarDaysIcon },
+  { id: 'free-agents', label: 'Free Agents', icon: UserGroupIcon },
+];
+
+const ALL_ITEMS = [...SEASON_ITEMS, ...LEAGUE_ITEMS, ...TEAM_ITEMS];
+
 function Placeholder({ section, season }: Readonly<{ section: Section; season: number }>) {
-  const item = NAV_ITEMS.find((n) => n.id === section);
+  const item = ALL_ITEMS.find((n) => n.id === section);
   if (!item) return null;
   const Icon = item.icon;
   return (
@@ -84,13 +107,20 @@ export default function DashboardPage() {
   const maxSeason = scenario.currentYear;
   const seasons = Array.from({ length: maxSeason }, (_, i) => maxSeason - i); // current → oldest
 
+  function selectSeason(s: number) {
+    setSelectedSeason(s);
+    if (s === 1 && FIRST_SEASON_DISABLED.has(activeSection)) {
+      setActiveSection('regular-season');
+    }
+  }
+
   function decrement() {
-    setSelectedSeason((s) => Math.max(1, s - 1));
+    selectSeason(Math.max(1, selectedSeason - 1));
     setDropdownOpen(false);
   }
 
   function increment() {
-    setSelectedSeason((s) => Math.min(maxSeason, s + 1));
+    selectSeason(Math.min(maxSeason, selectedSeason + 1));
     setDropdownOpen(false);
   }
 
@@ -152,7 +182,7 @@ export default function DashboardPage() {
                       <li key={s}>
                         <button
                           onClick={() => {
-                            setSelectedSeason(s);
+                            selectSeason(s);
                             setDropdownOpen(false);
                           }}
                           className={`w-full text-left px-3 py-2 text-sm transition-colors ${
@@ -190,24 +220,83 @@ export default function DashboardPage() {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 px-3 py-4 flex flex-col gap-1">
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
-            const active = activeSection === id;
-            return (
-              <button
-                key={id}
-                onClick={() => setActiveSection(id)}
-                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                  active
-                    ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent'
-                }`}
-              >
-                <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-orange-400' : ''}`} />
-                {label}
-              </button>
-            );
-          })}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto flex flex-col gap-4">
+          {/* Scenario group */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1 px-1">Scenario</p>
+            <div className="flex flex-col gap-1">
+              {SEASON_ITEMS.map(({ id, label, icon: Icon }) => {
+                const active = activeSection === id;
+                const disabled = selectedSeason === 1 && FIRST_SEASON_DISABLED.has(id);
+                let navClass: string;
+                if (disabled) { 
+                  navClass = 'text-gray-600 border border-transparent cursor-not-allowed opacity-40';
+                } else if (active) {
+                  navClass = 'bg-orange-500/15 text-orange-300 border border-orange-500/30';
+                } else {
+                  navClass = 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent';
+                }
+                return (
+                  <button
+                    key={id}
+                    onClick={() => !disabled && setActiveSection(id)}
+                    disabled={disabled}
+                    title={disabled ? 'Not available in Season 1' : undefined}
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${navClass}`}
+                  >
+                    <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-orange-400' : ''}`} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* League group */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1 px-1">League</p>
+            <div className="flex flex-col gap-1">
+              {LEAGUE_ITEMS.map(({ id, label, icon: Icon }) => {
+                const active = activeSection === id;
+                const navClass = active
+                  ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent';
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveSection(id)}
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${navClass}`}
+                  >
+                    <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-orange-400' : ''}`} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Team group */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1 px-1">Team</p>
+            <div className="flex flex-col gap-1">
+              {TEAM_ITEMS.map(({ id, label, icon: Icon }) => {
+                const active = activeSection === id;
+                const navClass = active
+                  ? 'bg-orange-500/15 text-orange-300 border border-orange-500/30'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white border border-transparent';
+                return (
+                  <button
+                    key={id}
+                    onClick={() => setActiveSection(id)}
+                    className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${navClass}`}
+                  >
+                    <Icon className={`h-5 w-5 shrink-0 ${active ? 'text-orange-400' : ''}`} />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </nav>
 
         {/* Footer */}
@@ -222,7 +311,7 @@ export default function DashboardPage() {
         <header className="h-14 flex items-center justify-between px-6 bg-gray-900 border-b border-gray-800 shrink-0">
           <div className="flex items-center gap-3">
             <h1 className="text-white font-semibold">
-              {NAV_ITEMS.find((n) => n.id === activeSection)?.label}
+              {ALL_ITEMS.find((n) => n.id === activeSection)?.label}
             </h1>
             <span className="text-xs bg-gray-800 border border-gray-700 text-gray-400 px-2 py-0.5 rounded-full">
               Season {selectedSeason}
