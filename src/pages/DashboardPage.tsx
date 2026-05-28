@@ -69,27 +69,26 @@ function Placeholder({ section, season }: Readonly<{ section: Section; season: n
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [scenario, setScenario] = useState<Scenario | null>(null);
+  const [scenario] = useState<Scenario | null>(() => {
+    const raw = sessionStorage.getItem(ACTIVE_SCENARIO_KEY);
+    if (!raw) return null;
+    try { return JSON.parse(raw) as Scenario; } catch { return null; }
+  });
   const [activeSection, setActiveSection] = useState<Section>('offseason');
-  const [selectedSeason, setSelectedSeason] = useState<number>(1);
+  const [selectedSeason, setSelectedSeason] = useState<number>(() => {
+    const raw = sessionStorage.getItem(ACTIVE_SCENARIO_KEY);
+    if (!raw) return 1;
+    try { const s: Scenario = JSON.parse(raw); return s.currentYear; } catch { return 1; }
+  });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Load scenario from sessionStorage
+  // Redirect if no scenario was found in sessionStorage
   useEffect(() => {
-    const raw = sessionStorage.getItem(ACTIVE_SCENARIO_KEY);
-    if (!raw) {
-      navigate('/choose-scenario', { replace: true });
-      return;
-    }
-    try {
-      const s: Scenario = JSON.parse(raw);
-      setScenario(s);
-      setSelectedSeason(s.currentYear);
-    } catch {
+    if (!scenario) {
       navigate('/choose-scenario', { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, scenario]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
