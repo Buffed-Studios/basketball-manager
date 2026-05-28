@@ -7,9 +7,11 @@ import {
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
 import { register, login } from '../services/authApi';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,7 +32,8 @@ export default function RegisterPage() {
       await register({ username, email, password });
       // Auto-login after successful registration
       await login({ username, password });
-      navigate('/dashboard');
+      signIn();
+      navigate('/choose-scenario');
     } catch {
       setError('Registration failed. That username may already be taken.');
     } finally {

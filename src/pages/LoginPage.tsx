@@ -6,9 +6,11 @@ import {
   ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import { login } from '../services/authApi';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +23,8 @@ export default function LoginPage() {
 
     try {
       await login({ username, password });
-      navigate('/dashboard');
+      signIn();
+      navigate('/choose-scenario');
     } catch (err: unknown) {
       console.error('[LoginPage] login error:', err);
       const status =
