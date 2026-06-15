@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import type { Game, StartGameRequest, StandingEntry } from './types';
+import type { Game, StartGameRequest, StandingEntry, SeasonGame, SeasonScheduleResponse, WatchGameResponse } from './types';
 
 const base = (scenarioId: string) => `/api/scenarios/${scenarioId}/games`;
 
@@ -25,9 +25,11 @@ export async function generateSeason(scenarioId: string, yearNumber: number): Pr
   return response.data;
 }
 
-export async function getSeason(scenarioId: string, yearNumber: number): Promise<Game[]> {
-  const response = await apiClient.get<Game[]>(`${base(scenarioId)}/season/${yearNumber}`);
-  return response.data;
+export async function getSeason(scenarioId: string, yearNumber: number): Promise<SeasonGame[]> {
+  const response = await apiClient.get<SeasonScheduleResponse>(
+    `${base(scenarioId)}/season/${yearNumber}`,
+  );
+  return response.data.games ?? [];
 }
 
 export async function getStandings(
@@ -52,11 +54,11 @@ export async function simulateGame(scenarioId: string, gameId: string): Promise<
 
 /**
  * Start live WebSocket streaming of a scheduled game.
- * After calling this, subscribe to /topic/game/{gameId} via STOMP
+ * Returns { gameId, topic } — subscribe to `topic` via STOMP
  * to receive play-by-play GameEvent messages.
  */
-export async function watchGame(scenarioId: string, gameId: string): Promise<Game> {
-  const response = await apiClient.post<Game>(`${base(scenarioId)}/${gameId}/watch`);
+export async function watchGame(scenarioId: string, gameId: string): Promise<WatchGameResponse> {
+  const response = await apiClient.post<WatchGameResponse>(`${base(scenarioId)}/${gameId}/watch`);
   return response.data;
 }
 
@@ -64,4 +66,9 @@ export async function watchGame(scenarioId: string, gameId: string): Promise<Gam
 export async function skipGame(scenarioId: string, gameId: string): Promise<Game> {
   const response = await apiClient.post<Game>(`${base(scenarioId)}/${gameId}/skip`);
   return response.data;
+}
+
+/** Simulate all remaining unplayed games in a season at once. */
+export async function simulateAllRemaining(scenarioId: string, yearNumber: number): Promise<void> {
+  await apiClient.post(`${base(scenarioId)}/season/${yearNumber}/simulate-remaining`);
 }

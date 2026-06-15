@@ -18,6 +18,8 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import type { Scenario } from '../services/types';
+import EventsFeedPanel from '../components/EventsFeedPanel';
+import RegularSeasonPage from './RegularSeasonPage';
 
 const ACTIVE_SCENARIO_KEY = 'bm_active_scenario';
 
@@ -105,6 +107,13 @@ export default function DashboardPage() {
 
   const maxSeason = scenario.currentYear;
   const seasons = Array.from({ length: maxSeason }, (_, i) => maxSeason - i); // current → oldest
+
+  function renderContent() {
+    if (!scenario) return null;
+    if (activeSection === 'events') return <EventsFeedPanel scenarioId={scenario.id} />;
+    if (activeSection === 'regular-season') return <RegularSeasonPage scenarioId={scenario.id} season={selectedSeason} />;
+    return <Placeholder section={activeSection} season={selectedSeason} />;
+  }
 
   function selectSeason(s: number) {
     setSelectedSeason(s);
@@ -324,7 +333,7 @@ export default function DashboardPage() {
 
         {/* Content area */}
         <div className="flex-1 overflow-auto">
-          <Placeholder section={activeSection} season={selectedSeason} />
+          {renderContent()}
         </div>
       </main>
     </div>

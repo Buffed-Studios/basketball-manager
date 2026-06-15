@@ -82,6 +82,35 @@ export interface PlayerStats {
   freeThrowPercentage: number;
 }
 
+export interface LeaderboardEntry extends PlayerStats {
+  firstName: string;
+  lastName: string;
+  position: string;
+  teamName?: string;
+}
+
+export interface LeaderboardPlayerEntry {
+  rank: number;
+  firstName: string;
+  lastName: string;
+  teamName: string;
+  gamesPlayed: number;
+  made: number;
+  attempted: number;
+  accuracy: number;
+}
+
+export interface SeasonLeaderboard {
+  yearNumber: number;
+  topScorers: LeaderboardPlayerEntry[];
+  topTwoPointAccuracy: LeaderboardPlayerEntry[];
+  topFourPointAccuracy: LeaderboardPlayerEntry[];
+  topRebounders: LeaderboardPlayerEntry[];
+  topStealers: LeaderboardPlayerEntry[];
+  topBlockers: LeaderboardPlayerEntry[];
+  topFreeThrowAccuracy: LeaderboardPlayerEntry[];
+}
+
 // ---------------------------------------------------------------------------
 // Games
 // ---------------------------------------------------------------------------
@@ -100,18 +129,62 @@ export interface Game {
   yearNumber: number;
 }
 
+/** Shape of each game returned inside the season schedule response. */
+export interface SeasonGame {
+  id: string;
+  homeTeamId: string;
+  homeTeamName: string;
+  awayTeamId: string;
+  awayTeamName: string;
+  yearNumber: number;
+  gameNumber: number;
+  played: boolean;
+  homeScore: number | null;
+  awayScore: number | null;
+  playedAt: string | null;
+  userGame?: boolean;
+}
+
+export interface SeasonScheduleResponse {
+  yearNumber: number;
+  totalGames: number;
+  games: SeasonGame[];
+}
+
 export interface StartGameRequest {
   homeTeamId: string;
   awayTeamId: string;
 }
 
+export interface WatchGameResponse {
+  gameId: string;
+  topic: string;
+}
+
 export interface StandingEntry {
+  rank: number;
   teamId: string;
   teamName: string;
+  userTeam: boolean;
+  gamesPlayed: number;
   wins: number;
   losses: number;
-  winPercentage: number;
-  gamesBack: number;
+  pointsFor: number;
+  pointsAgainst: number;
+  pointDifferential: number;
+}
+
+// ---------------------------------------------------------------------------
+// League Events
+// ---------------------------------------------------------------------------
+
+export interface LeagueEventResponse {
+  id: string;
+  scenarioId: string;
+  type: string;
+  description: string;
+  yearNumber: number;
+  createdAt: string;
 }
 
 // WebSocket play-by-play event pushed to /topic/game/{gameId}

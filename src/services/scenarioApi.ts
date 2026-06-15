@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import type { Scenario, CreateScenarioRequest } from './types';
+import type { Scenario, CreateScenarioRequest, LeagueEventResponse } from './types';
 
 export async function getScenarios(): Promise<Scenario[]> {
   const response = await apiClient.get<Scenario[]>('/api/scenarios');
@@ -18,4 +18,11 @@ export async function createScenario(body: CreateScenarioRequest): Promise<Scena
 
 export async function deleteScenario(scenarioId: string): Promise<void> {
   await apiClient.delete(`/api/scenarios/${scenarioId}`);
+}
+
+export async function getEvents(scenarioId: string): Promise<LeagueEventResponse[]> {
+  const response = await apiClient.get<LeagueEventResponse[]>(
+    `/api/scenarios/${scenarioId}/events`,
+  );
+  return response.data;
 }

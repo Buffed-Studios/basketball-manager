@@ -6,12 +6,15 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChooseScenarioPage from './pages/ChooseScenarioPage';
 import DashboardPage from './pages/DashboardPage';
+import WatchGamePage from './pages/WatchGamePage';
 
 const NAVBAR_HIDDEN_PATHS = new Set(['/dashboard']);
 
 function Layout() {
   const location = useLocation();
-  const hideNavbar = NAVBAR_HIDDEN_PATHS.has(location.pathname);
+  const hideNavbar =
+    NAVBAR_HIDDEN_PATHS.has(location.pathname) ||
+    location.pathname.startsWith('/watch/');
 
   return (
     <>
@@ -22,6 +25,7 @@ function Layout() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/choose-scenario" element={<ChooseScenarioPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/watch/:gameId" element={<WatchGamePage />} />
         <Route path="/account" element={<Navigate to="/" replace />} />
       </Routes>
     </>

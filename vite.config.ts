@@ -7,4 +7,8 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom'],
   },
+  define: {
+    // Polyfill global for sockjs-client and other Node.js libraries
+    global: 'globalThis',
+  },
 })
